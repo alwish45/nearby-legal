@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search deals — near.by</title>
+<meta name="description" content="Search local deals near you, sorted by how close they are.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf8f4;
+    --fg: #14110d;
+    --muted: #6b655b;
+    --faint: #8a8377;
+    --line: #ddd6ca;
+    --card: #ffffff;
+    --accent: #e8542a;
+    --chip: #f1ece3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14110d;
+      --fg: #ece8e0;
+      --muted: #b0a99c;
+      --faint: #8a8377;
+      --line: #3a352d;
+      --card: #1c1813;
+      --chip: #241f19;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    max-width: 720px; margin: 0 auto; padding: 40px 20px 80px;
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--fg); background: var(--bg);
+  }
+
+  a { color: var(--accent); }
+
+  .back { font-size: 14px; font-weight: 600; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+
+  h1 { font-size: 28px; letter-spacing: -0.5px; margin: 18px 0 4px; }
+  .dot { color: var(--accent); }
+  .sub { color: var(--muted); margin-top: 0; }
+
+  /* --- controls --- */
+  .controls {
+    position: sticky; top: 0; z-index: 5;
+    padding: 12px 0 10px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+  }
+
+  .search-row { display: flex; gap: 8px; }
+
+  #q {
+    flex: 1; min-width: 0;
+    padding: 12px 14px;
+    font: inherit; font-size: 16px;
+    color: var(--fg); background: var(--card);
+    border: 1px solid var(--line); border-radius: 10px;
+  }
+  #q:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  #q::placeholder { color: var(--faint); }
+
+  .clear-btn {
+    padding: 0 14px; font: inherit; font-weight: 600; font-size: 14px;
+    color: var(--muted); background: var(--chip);
+    border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
+  }
+  .clear-btn:hover { color: var(--fg); }
+  .clear-btn[hidden] { display: none; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+  .chip {
+    padding: 7px 12px; font: inherit; font-size: 14px; font-weight: 600;
+    color: var(--muted); background: var(--chip);
+    border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+    white-space: nowrap;
+  }
+  .chip:hover { color: var(--fg); }
+  .chip[aria-pressed="true"] {
+    color: #fff; background: var(--accent); border-color: var(--accent);
+  }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .sort-row {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    margin-top: 12px; font-size: 14px; color: var(--muted);
+  }
+  .sort-row label { font-weight: 600; }
+  #sort {
+    font: inherit; font-size: 14px; padding: 6px 10px;
+    color: var(--fg); background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+
+  /* --- status line --- */
+  .status { font-size: 14px; color: var(--muted); margin-bottom: 14px; }
+  .status .loc-btn {
+    font: inherit; font-size: 14px; font-weight: 600;
+    color: var(--accent); background: none; border: 0; padding: 0;
+    cursor: pointer; text-decoration: underline;
+  }
+
+  /* --- results --- */
+  ul.results { list-style: none; padding: 0; margin: 0; }
+
+  .deal {
+    background: var(--card);
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 18px; margin-bottom: 12px;
+  }
+
+  .deal-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  }
+  .biz { font-weight: 700; font-size: 15px; }
+  .dist { font-size: 14px; color: var(--faint); white-space: nowrap; }
+
+  .deal h2 { font-size: 17px; margin: 6px 0 4px; letter-spacing: -0.2px; }
+  .deal p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin-top: 12px; font-size: 13px; color: var(--faint);
+  }
+  .badge {
+    padding: 3px 9px; border-radius: 999px;
+    background: var(--chip); color: var(--muted); font-weight: 600;
+  }
+  .badge.today { background: var(--accent); color: #fff; }
+  .meta a { font-weight: 600; text-decoration: none; }
+  .meta a:hover { text-decoration: underline; }
+
+  mark { background: rgba(232, 84, 42, 0.22); color: inherit; border-radius: 3px; padding: 0 1px; }
+
+  .empty {
+    text-align: center; padding: 48px 20px;
+    border: 1px dashed var(--line); border-radius: 10px; color: var(--muted);
+  }
+  .empty strong { display: block; color: var(--fg); margin-bottom: 6px; }
+
+  .note {
+    margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--faint);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 24px 16px 60px; }
+    .deal-head { flex-direction: column; gap: 2px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back" href="./index.html">&larr; near<span class="dot">.</span>by</a>
+
+<h1>Search deals</h1>
+<p class="sub">Find a deal near you, sorted by how close it is.</p>
+
+<div class="controls">
+  <div class="search-row">
+    <input id="q" type="search" autocomplete="off" aria-label="Search deals"
+           placeholder="Search movie theaters, tacos, coffee&hellip;">
+    <button id="clear" class="clear-btn" type="button" hidden>Clear</button>
+  </div>
+
+  <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+
+  <div class="sort-row">
+    <label for="sort">Sort</label>
+    <select id="sort">
+      <option value="distance">Nearest first</option>
+      <option value="today">Running today first</option>
+      <option value="name">Business A&ndash;Z</option>
+    </select>
+  </div>
+</div>
+
+<p class="status" id="status" role="status" aria-live="polite"></p>
+
+<ul class="results" id="results"></ul>
+
+<p class="note">
+  Deals are sample listings for development and are not verified offers. Always confirm
+  with the business before making a trip. See the <a href="./terms.html">Terms of Use</a>.
+</p>
+
+<script src="./deals.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var qInput   = document.getElementById('q');
+  var clearBtn = document.getElementById('clear');
+  var chipsEl  = document.getElementById('chips');
+  var sortEl   = document.getElementById('sort');
+  var statusEl = document.getElementById('status');
+  var listEl   = document.getElementById('results');
+
+  var state = {
+    query: '',
+    categories: [],            // empty means "all"
+    sort: 'distance',
+    origin: DEFAULT_LOCATION,  // falls back to Kimball Junction
+    usingDeviceLocation: false
+  };
+
+  var DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  /* ---------- helpers ---------- */
+
+  // Great-circle distance in miles.
+  function distanceMiles(a, b) {
+    var R = 3958.8;
+    var toRad = function (d) { return d * Math.PI / 180; };
+    var dLat = toRad(b.lat - a.lat);
+    var dLng = toRad(b.lng - a.lng);
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  }
+
+  function formatDistance(mi) {
+    // Walking distance reads better in feet than as "0.0 mi".
+    if (mi < 0.2) return Math.max(50, Math.round(mi * 5280 / 50) * 50) + ' ft';
+    if (mi < 10)  return mi.toFixed(1) + ' mi';
+    return Math.round(mi) + ' mi';
+  }
+
+  function runsToday(deal) {
+    if (!deal.days) return true;
+    return deal.days.indexOf(new Date().getDay()) !== -1;
+  }
+
+  function daysLabel(deal) {
+    if (!deal.days) return 'Every day';
+    if (deal.days.length === 5 && [1,2,3,4,5].every(function (d) { return deal.days.indexOf(d) !== -1; })) {
+      return 'Weekdays';
+    }
+    return deal.days.map(function (d) { return DAY_NAMES[d].slice(0, 3); }).join(', ');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // Escape a user string for safe use inside a RegExp.
+  function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Escape for HTML, then wrap query terms in <mark>.
+  function highlight(text, terms) {
+    var html = escapeHtml(text);
+    if (!terms.length) return html;
+    var pattern = terms.map(escapeRegExp).join('|');
+    // Skip anything inside an HTML entity so &amp; is not broken apart.
+    return html.replace(new RegExp('(' + pattern + ')(?![^&]*;)', 'gi'), '<mark>$1</mark>');
+  }
+
+  /* ---------- filtering ---------- */
+
+  function searchTerms() {
+    return state.query.toLowerCase().split(/\s+/).filter(Boolean);
+  }
+
+  function matches(deal, terms) {
+    if (state.categories.length && state.categories.indexOf(deal.category) === -1) {
+      return false;
+    }
+    if (!terms.length) return true;
+
+    var haystack = [
+      deal.business,
+      deal.title,
+      deal.detail,
+      deal.address,
+      CATEGORIES[deal.category].label
+    ].join(' ').toLowerCase();
+
+    // Every term must appear somewhere: "movie tuesday" narrows, it does not widen.
+    return terms.every(function (t) { return haystack.indexOf(t) !== -1; });
+  }
+
+  function visibleDeals() {
+    var terms = searchTerms();
+
+    var rows = DEALS.filter(function (d) { return matches(d, terms); })
+                    .map(function (d) {
+                      return { deal: d, miles: distanceMiles(state.origin, d) };
+                    });
+
+    rows.sort(function (a, b) {
+      if (state.sort === 'name') {
+        return a.deal.business.localeCompare(b.deal.business) ||
+               a.deal.title.localeCompare(b.deal.title);
+      }
+      if (state.sort === 'today') {
+        var diff = (runsToday(b.deal) ? 1 : 0) - (runsToday(a.deal) ? 1 : 0);
+        if (diff) return diff;
+      }
+      return a.miles - b.miles;
+    });
+
+    return rows;
+  }
+
+  /* ---------- rendering ---------- */
+
+  function renderChips() {
+    var html = Object.keys(CATEGORIES).map(function (key) {
+      var on = state.categories.indexOf(key) !== -1;
+      var count = DEALS.filter(function (d) { return d.category === key; }).length;
+      return '<button class="chip" type="button" data-cat="' + key + '" aria-pressed="' + on + '">' +
+             CATEGORIES[key].emoji + ' ' + escapeHtml(CATEGORIES[key].label) +
+             ' <span aria-hidden="true">(' + count + ')</span></button>';
+    });
+
+    html.unshift(
+      '<button class="chip" type="button" data-cat="" aria-pressed="' +
+      (state.categories.length === 0) + '">All deals</button>'
+    );
+
+    chipsEl.innerHTML = html.join('');
+  }
+
+  function renderStatus(count) {
+    var where = state.usingDeviceLocation
+      ? 'your location'
+      : escapeHtml(state.origin.label);
+
+    var bits = [count + (count === 1 ? ' deal' : ' deals')];
+    if (state.query) bits.push('matching &ldquo;' + escapeHtml(state.query) + '&rdquo;');
+    bits.push('near ' + where);
+
+    var html = bits.join(' ') + '.';
+    if (!state.usingDeviceLocation && 'geolocation' in navigator) {
+      html += ' <button class="loc-btn" type="button" id="useloc">Use my location</button>';
+    }
+    statusEl.innerHTML = html;
+
+    var btn = document.getElementById('useloc');
+    if (btn) btn.addEventListener('click', requestLocation);
+  }
+
+  function renderResults() {
+    var rows = visibleDeals();
+    var terms = searchTerms();
+
+    renderStatus(rows.length);
+
+    if (!rows.length) {
+      listEl.innerHTML =
+        '<li class="empty"><strong>Nothing matches yet.</strong>' +
+        'Try a shorter search, or clear the category filters.</li>';
+      return;
+    }
+
+    listEl.innerHTML = rows.map(function (row) {
+      var d = row.deal;
+      var cat = CATEGORIES[d.category];
+      var maps = 'https://www.google.com/maps/search/?api=1&query=' + d.lat + ',' + d.lng;
+
+      var badges = '<span class="badge">' + cat.emoji + ' ' + escapeHtml(cat.label) + '</span>';
+      if (runsToday(d)) badges += '<span class="badge today">Today</span>';
+
+      var when = daysLabel(d) + (d.window ? ' &middot; ' + escapeHtml(d.window) : '');
+
+      return '<li class="deal">' +
+        '<div class="deal-head">' +
+          '<span class="biz">' + highlight(d.business, terms) + '</span>' +
+          '<span class="dist">' + formatDistance(row.miles) + '</span>' +
+        '</div>' +
+        '<h2>' + highlight(d.title, terms) + '</h2>' +
+        '<p>' + highlight(d.detail, terms) + '</p>' +
+        '<div class="meta">' + badges +
+          '<span>' + when + '</span>' +
+          '<a href="' + maps + '" target="_blank" rel="noopener">Directions</a>' +
+        '</div>' +
+      '</li>';
+    }).join('');
+  }
+
+  /* ---------- location ---------- */
+
+  function requestLocation() {
+    if (!('geolocation' in navigator)) return;
+    statusEl.textContent = 'Getting your location…';
+    navigator.geolocation.getCurrentPosition(
+      function (pos) {
+        state.origin = { lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'you' };
+        state.usingDeviceLocation = true;
+        renderResults();
+      },
+      function () {
+        // Denied or unavailable: quietly stay on the fallback location.
+        state.usingDeviceLocation = false;
+        renderResults();
+      },
+      { timeout: 8000, maximumAge: 300000 }
+    );
+  }
+
+  /* ---------- URL state (shareable searches) ---------- */
+
+  function readUrl() {
+    var params = new URLSearchParams(location.search);
+    state.query = params.get('q') || '';
+    var cat = params.get('cat');
+    state.categories = cat ? cat.split(',').filter(function (c) { return CATEGORIES[c]; }) : [];
+    var sort = params.get('sort');
+    if (sort === 'today' || sort === 'name' || sort === 'distance') state.sort = sort;
+  }
+
+  function writeUrl() {
+    var params = new URLSearchParams();
+    if (state.query) params.set('q', state.query);
+    if (state.categories.length) params.set('cat', state.categories.join(','));
+    if (state.sort !== 'distance') params.set('sort', state.sort);
+    var qs = params.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  }
+
+  function update() {
+    clearBtn.hidden = !state.query && !state.categories.length;
+    writeUrl();
+    renderChips();
+    renderResults();
+  }
+
+  /* ---------- events ---------- */
+
+  qInput.addEventListener('input', function () {
+    state.query = qInput.value.trim();
+    update();
+  });
+
+  clearBtn.addEventListener('click', function () {
+    state.query = '';
+    state.categories = [];
+    qInput.value = '';
+    qInput.focus();
+    update();
+  });
+
+  chipsEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip');
+    if (!btn) return;
+    var cat = btn.dataset.cat;
+
+    if (!cat) {
+      state.categories = [];               // "All deals"
+    } else {
+      var i = state.categories.indexOf(cat);
+      if (i === -1) state.categories.push(cat);
+      else state.categories.splice(i, 1);
+    }
+    update();
+  });
+
+  sortEl.addEventListener('change', function () {
+    state.sort = sortEl.value;
+    update();
+  });
+
+  /* ---------- init ---------- */
+
+  readUrl();
+  qInput.value = state.query;
+  sortEl.value = state.sort;
+  update();
+})();
+</script>
+
+</body>
+</html>
