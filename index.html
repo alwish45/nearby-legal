@@ -3,38 +3,276 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>near.by — Legal &amp; Support</title>
-<meta name="description" content="Privacy policy, terms of use, support and account deletion for the near.by app.">
+<title>near.by — Local deals, sorted by how close they are</title>
+<meta name="description" content="near.by shows happy hours, specials and events at businesses near you, sorted by distance. Free for businesses to list and post deals.">
+<meta property="og:title" content="near.by — Local deals, sorted by how close they are">
+<meta property="og:description" content="Happy hours, specials and events near you. Free for businesses to list.">
+<meta property="og:type" content="website">
 <style>
-  :root { color-scheme: light dark; }
-  body {
-    max-width: 640px; margin: 0 auto; padding: 80px 20px;
-    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #14110d; background: #faf8f4;
+  :root {
+    color-scheme: light dark;
+    --bg: #faf8f4;
+    --ink: #14110d;
+    --muted: #6b655b;
+    --faint: #8a8377;
+    --rule: #ddd6ca;
+    --card: #ffffff;
+    --accent: #c23f18;
+    --accent-ink: #faf8f4;
   }
   @media (prefers-color-scheme: dark) {
-    body { color: #ece8e0; background: #14110d; }
+    :root {
+      --bg: #14110d;
+      --ink: #ece8e0;
+      --muted: #b0a99c;
+      --faint: #b0a99c;
+      --rule: #3a352d;
+      --card: #1c1813;
+      --accent: #ff7a4d;
+      --accent-ink: #14110d;
+    }
   }
-  h1 { font-size: 34px; letter-spacing: -1px; margin-bottom: 6px; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--accent); }
+
+  header { padding: 28px 0 0; }
+  .wordmark { font-size: 24px; font-weight: 800; letter-spacing: -0.6px; text-decoration: none; color: var(--ink); }
   .dot { color: #e8542a; }
-  p { color: #6b655b; }
-  @media (prefers-color-scheme: dark) { p { color: #b0a99c; } }
-  ul { list-style: none; padding: 0; margin-top: 28px; }
-  li { margin-bottom: 12px; }
-  a { color: #c23f18; font-weight: 600; text-decoration: none; }
-  @media (prefers-color-scheme: dark) { a { color: #ff7a4d; } }
-  a:hover { text-decoration: underline; }
+
+  .hero { padding: 64px 0 56px; border-bottom: 1px solid var(--rule); }
+  h1 { font-size: 44px; line-height: 1.1; letter-spacing: -1.6px; margin: 0 0 18px; }
+  .lede { font-size: 19px; color: var(--muted); margin: 0 0 28px; max-width: 34em; }
+  .soon {
+    display: inline-block; font-size: 13px; font-weight: 700; color: var(--faint);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 7px 14px;
+  }
+
+  section { padding: 52px 0; border-bottom: 1px solid var(--rule); }
+  h2 { font-size: 26px; letter-spacing: -0.6px; margin: 0 0 14px; }
+  h3 { font-size: 17px; margin: 0 0 4px; }
+  p { margin: 0 0 16px; }
+  .muted { color: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 30px; }
+  .grid p { font-size: 15px; color: var(--muted); margin: 0; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; gap: 20px; } h1 { font-size: 34px; letter-spacing: -1px; } }
+
+  .biz { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 28px; }
+  .free { display: inline-block; background: var(--accent); color: var(--accent-ink);
+          font-size: 12px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+          padding: 5px 10px; border-radius: 6px; margin-bottom: 14px; }
+
+  label { display: block; font-size: 13px; font-weight: 700; margin: 0 0 6px; }
+  .req { color: var(--accent); }
+  input, textarea {
+    width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--bg); border: 1.5px solid var(--rule); border-radius: 10px;
+    padding: 11px 12px; margin-bottom: 15px;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  textarea { min-height: 84px; resize: vertical; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; gap: 0; } }
+  /* Bots fill every field they find; people never see this one. */
+  .trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  button {
+    font: inherit; font-weight: 800; font-size: 16px; cursor: pointer;
+    background: var(--ink); color: var(--bg); border: 0;
+    border-radius: 11px; padding: 14px 22px; width: 100%;
+  }
+  button:disabled { opacity: 0.55; cursor: default; }
+  .note { font-size: 13px; color: var(--faint); margin: 12px 0 0; }
+  .msg { font-size: 15px; border-radius: 10px; padding: 13px 15px; margin-top: 16px; }
+  .msg.ok { background: rgba(26,122,60,0.12); color: #1a7a3c; }
+  .msg.bad { background: rgba(194,63,24,0.12); color: var(--accent); }
+  @media (prefers-color-scheme: dark) { .msg.ok { color: #58d68a; } }
+
+  footer { padding: 36px 0 60px; font-size: 14px; color: var(--faint); }
+  footer a { margin-right: 18px; display: inline-block; margin-bottom: 8px; }
+  .addr { margin-top: 14px; font-size: 13px; }
 </style>
 </head>
 <body>
-  <h1>near<span class="dot">.</span>by</h1>
-  <p>Local deals, sorted by how close they are.</p>
-  <ul>
-    <li><a href="./privacy.html">Privacy Policy</a></li>
-    <li><a href="./terms.html">Terms of Use</a></li>
-    <li><a href="./support.html">Support</a></li>
-    <li><a href="./delete-account.html">Delete your account</a></li>
-    <li><a href="mailto:alandlipp@gmail.com">Contact</a></li>
-  </ul>
+
+<div class="wrap">
+
+  <header><a class="wordmark" href="./index.html">near<span class="dot">.</span>by</a></header>
+
+  <div class="hero">
+    <h1>Local deals, sorted by how close they are.</h1>
+    <p class="lede">
+      Happy hours, specials and events at businesses around you — ordered by distance,
+      so the first thing you see is the closest thing that's on right now.
+    </p>
+    <span class="soon">Coming soon to the App Store and Google Play</span>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="grid">
+      <div>
+        <h3>Closest first</h3>
+        <p>Deals are sorted by how far away they are, not by who paid the most.</p>
+      </div>
+      <div>
+        <h3>On right now</h3>
+        <p>The feed knows what's live at this minute, what starts later today, and what's on all week.</p>
+      </div>
+      <div>
+        <h3>No tracking</h3>
+        <p>Your location is used to find nearby deals and is never stored. No ad SDKs, no profile.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="business">
+    <div class="biz">
+      <span class="free">Free to list</span>
+      <h2>Are you a business?</h2>
+      <p class="muted">
+        Listing your business and posting deals is free, with no card required. Add
+        yourself below and we'll get you listed — usually within a day. Once you're
+        in, you can claim your listing in the app and post and edit deals yourself.
+      </p>
+
+      <form id="f" novalidate>
+        <label for="name">Business name <span class="req">*</span></label>
+        <input id="name" name="name" required maxlength="200" autocomplete="organization">
+
+        <div class="row">
+          <div>
+            <label for="city">City</label>
+            <input id="city" name="city" maxlength="120" autocomplete="address-level2">
+          </div>
+          <div>
+            <label for="address">Street address</label>
+            <input id="address" name="address" maxlength="200" autocomplete="street-address">
+          </div>
+        </div>
+
+        <label for="website">Website</label>
+        <input id="website" name="website" maxlength="300" autocomplete="url" inputmode="url">
+
+        <div class="row">
+          <div>
+            <label for="contact_name">Your name</label>
+            <input id="contact_name" name="contact_name" maxlength="120" autocomplete="name">
+          </div>
+          <div>
+            <label for="contact_email">Your email</label>
+            <input id="contact_email" name="contact_email" type="email" maxlength="200" autocomplete="email">
+          </div>
+        </div>
+
+        <label for="note">Deals you'd like listed, hours, anything else</label>
+        <textarea id="note" name="note" maxlength="2000"></textarea>
+
+        <div class="trap" aria-hidden="true">
+          <label for="company_url">Leave this empty</label>
+          <input id="company_url" name="company_url" tabindex="-1" autocomplete="off">
+        </div>
+
+        <button type="submit" id="go">Add my business</button>
+        <p class="note">We only store your email so we can reply about your listing.</p>
+        <div id="msg" hidden></div>
+      </form>
+    </div>
+  </section>
+
+  <section>
+    <h2>Something wrong with a deal?</h2>
+    <p class="muted">
+      Businesses change their offers without telling us. Tap <strong>Report</strong> on any
+      deal in the app, or <a href="mailto:alandlipp@gmail.com?subject=near.by%20deal%20correction">email us</a> —
+      it's the fastest way to get it fixed and we're grateful for it.
+    </p>
+  </section>
+
+  <footer>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./terms.html">Terms</a>
+    <a href="./support.html">Support</a>
+    <a href="./delete-account.html">Delete your account</a>
+    <a href="mailto:alandlipp@gmail.com">Contact</a>
+    <p class="addr">Near.by LLC, Utah · <a href="mailto:alandlipp@gmail.com">alandlipp@gmail.com</a></p>
+  </footer>
+
+</div>
+
+<script>
+// The anon key is public by design — it is already inside the shipped app, and
+// business_submissions is insert-only under row-level security, so this can
+// add a row and read nothing back.
+const SUPABASE_URL = 'https://vieoqoczhqbcxpflyjcp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZW9xb2N6aHFiY3hwZmx5amNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NTE0NTgsImV4cCI6MjA5ODIyNzQ1OH0.SQrn1a5DHUfKdhRFTdYOUE6S_gLOYhhlN7NKVDqYwEo';
+
+const form = document.getElementById('f');
+const btn = document.getElementById('go');
+const msg = document.getElementById('msg');
+
+function show(kind, text) {
+  msg.className = 'msg ' + kind;
+  msg.textContent = text;
+  msg.hidden = false;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
+
+  // Honeypot: a real person never sees this field, so anything in it is a bot.
+  // Report success either way rather than teaching the bot what tripped it.
+  if (data.company_url) { show('ok', "Thanks — we'll be in touch."); form.reset(); return; }
+  delete data.company_url;
+
+  if (!data.name || data.name.trim().length < 2) {
+    show('bad', 'Please enter your business name.');
+    document.getElementById('name').focus();
+    return;
+  }
+
+  const row = {};
+  for (const [k, v] of Object.entries(data)) {
+    const trimmed = (v || '').trim();
+    if (trimmed) row[k] = trimmed;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/business_submissions', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        // No RETURNING: the table has no select policy on purpose, so asking
+        // for the row back would fail a write that actually succeeded.
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    form.innerHTML =
+      '<h3 style="margin-bottom:8px">Got it — thanks.</h3>' +
+      '<p class="muted" style="margin:0">We\'ll add ' +
+      row.name.replace(/[<>&]/g, '') +
+      ' to near.by, usually within a day. If you left an email we\'ll let you know ' +
+      'once it\'s listed so you can claim it and start posting deals.</p>';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Add my business';
+    show('bad', "That didn't send. Please email alandlipp@gmail.com and we'll add you by hand.");
+  }
+});
+</script>
+
 </body>
 </html>
