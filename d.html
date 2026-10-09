@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A deal near you — near.by</title>
+<meta name="description" content="A local deal shared from near.by — food specials, events and offers sorted by how close they are.">
+<meta property="og:title" content="A deal near you — near.by">
+<meta property="og:description" content="Shared from near.by: local deals in Park City and Salt Lake City, sorted by distance.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="./site.css">
+<style>
+  .deal { margin-top: 8px; }
+  .deal h1 { margin-bottom: 6px; }
+  .biz { font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+  .where { margin: 0 0 20px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+  .chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 600; color: var(--ink); }
+  .chip.hot { border-color: var(--accent); color: var(--accent); }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0 32px; }
+  .ghost { display: inline-block; border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 700; padding: 12px 18px; border-radius: 12px; }
+  .note { font-size: 13px; color: var(--faint); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a class="logo" href="./">near<span class="dot">.</span>by</a>
+  <nav>
+    <a href="./business.html">For businesses</a>
+    <a class="pill" href="./#get">Get the app</a>
+  </nav>
+</header>
+
+<main class="page">
+  <p id="loading">Loading deal…</p>
+
+  <section id="missing" hidden>
+    <h1>This deal has ended</h1>
+    <p class="lead">It may have expired or been taken down by the business. Plenty more are running nearby.</p>
+    <a class="btn" href="./#get">See deals near you →</a>
+  </section>
+
+  <section id="deal" class="deal" hidden>
+    <p class="eyebrow">Shared from near.by</p>
+    <h1 id="title"></h1>
+    <p class="biz" id="biz"></p>
+    <p class="where" id="where"></p>
+    <div class="chips" id="chips"></div>
+    <p id="desc"></p>
+    <div class="actions">
+      <a class="btn" id="directions" href="#" target="_blank" rel="noopener">Get directions</a>
+      <a class="ghost" id="website" href="#" target="_blank" rel="noopener" hidden>Business website ↗</a>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Find more deals like this, closest first</h2>
+      <p>near.by shows what's on around you right now. Free, no sign-up, no tracking.</p>
+      <div class="stores">
+        <!-- Same store links as the home page; replace href="#" and remove "soon" once live. -->
+        <a class="store soon" href="#"><span class="store-small">Coming soon to the</span><span class="store-big">App Store</span></a>
+        <a class="store soon" href="#"><span class="store-small">Coming soon to</span><span class="store-big">Google Play</span></a>
+      </div>
+    </div>
+    <p class="note">Deals change. Please confirm with the business before you go.</p>
+  </section>
+</main>
+
+<footer>
+  <a href="./privacy.html">Privacy</a>
+  <a href="./terms.html">Terms</a>
+  <a href="./delete-account.html">Delete account</a>
+  <a href="mailto:alandlipp@gmail.com">Contact</a>
+  <span class="copy">© 2026 Near.by LLC</span>
+</footer>
+
+<script>
+// Public read-only key (the same one the app ships). Row-level security only
+// exposes active, reviewed deals.
+const SUPABASE_URL = 'https://vieoqoczhqbcxpflyjcp.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpZW9xb2N6aHFiY3hwZmx5amNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NTE0NTgsImV4cCI6MjA5ODIyNzQ1OH0.SQrn1a5DHUfKdhRFTdYOUE6S_gLOYhhlN7NKVDqYwEo';
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function show(id) {
+  document.getElementById('loading').hidden = true;
+  document.getElementById(id).hidden = false;
+}
+
+function fmtTime(t) {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  const hour = h % 12 || 12, ampm = h >= 12 ? 'pm' : 'am';
+  return m ? `${hour}:${String(m).padStart(2, '0')}${ampm}` : `${hour}${ampm}`;
+}
+
+function chip(text, hot) {
+  const el = document.createElement('span');
+  el.className = 'chip' + (hot ? ' hot' : '');
+  el.textContent = text;
+  document.getElementById('chips').appendChild(el);
+}
+
+async function load() {
+  const id = new URLSearchParams(location.search).get('id') || '';
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return show('missing');
+
+  const select = 'title,description,price_info,deal_type,recurring_days,start_time,end_time,valid_until,' +
+    'businesses(name,address,city,website)';
+  let deal;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/deals?id=eq.${id}&select=${select}`, {
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
+    });
+    deal = (await res.json())[0];
+  } catch (e) { /* fall through to "ended" */ }
+  if (!deal) return show('missing');
+
+  const biz = deal.businesses || {};
+  document.title = `${deal.title} at ${biz.name || 'a local spot'} — near.by`;
+  document.getElementById('title').textContent = deal.title;
+  document.getElementById('biz').textContent = biz.name || '';
+  const showCity = biz.city && !(biz.address || '').includes(biz.city);
+  document.getElementById('where').textContent = [biz.address, showCity && biz.city].filter(Boolean).join(', ');
+  document.getElementById('desc').textContent = deal.description || '';
+
+  if (deal.recurring_days && deal.recurring_days.length) chip(deal.recurring_days.map(d => DAYS[d]).join(' · '));
+  const start = fmtTime(deal.start_time), end = fmtTime(deal.end_time);
+  if (start && end) chip(`${start}–${end}`);
+  if (deal.price_info) chip(deal.price_info, true);
+  if (deal.valid_until) {
+    const days = Math.ceil((Date.parse(deal.valid_until + 'T23:59:59') - Date.now()) / 864e5);
+    if (days >= 0) chip(days === 0 ? 'Ends today' : `${days} day${days === 1 ? '' : 's'} left`, days <= 3);
+  }
+
+  const q = encodeURIComponent([biz.name, biz.address, showCity && biz.city].filter(Boolean).join(', '));
+  document.getElementById('directions').href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+  if (biz.website && /^https?:\/\//i.test(biz.website)) {
+    const w = document.getElementById('website');
+    w.href = biz.website;
+    w.hidden = false;
+  }
+  show('deal');
+}
+load();
+</script>
+</body>
+</html>
