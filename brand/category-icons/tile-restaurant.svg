@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#e8542a"/></linearGradient>
+<radialGradient id="h" cx=".28" cy=".2" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+<rect width="320" height="200" fill="url(#g)"/><rect width="320" height="200" fill="url(#h)"/>
+<g transform="translate(196 34) rotate(-14) scale(7.5)" fill="none" stroke="#fff8ee" stroke-opacity=".16" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d='M6.5 3v5.5a2.5 2.5 0 0 0 5 0V3M9 3v18'/><path d='M17.5 3c-2.2 2-2.8 5.4-2.3 9.5h2.3M17.5 3v18'/></g>
+<circle cx="160" cy="100" r="44" fill="#fff" fill-opacity=".16"/><circle cx="160" cy="100" r="44" fill="none" stroke="#fff" stroke-opacity=".35"/>
+<g transform="translate(131.2 71.2) scale(2.4)" fill="none" stroke="#fff8ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d='M6.5 3v5.5a2.5 2.5 0 0 0 5 0V3M9 3v18'/><path fill='#fff8ee' fill-opacity='.22' stroke='none' d='M17.5 3c-2.2 2-2.8 5.4-2.3 9.5h2.3z'/><path d='M17.5 3c-2.2 2-2.8 5.4-2.3 9.5h2.3M17.5 3v18'/></g>
+</svg>
